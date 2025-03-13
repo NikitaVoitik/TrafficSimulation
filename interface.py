@@ -146,6 +146,8 @@ class Window:
     def add_od_pair(self, origin, destination, demand):
         success, message = self.graph_manager.add_od_pair(origin, destination, demand)
         self._set_status(message, not success)
+        if success:
+            self.draw_graph()
         return success
 
     def _set_status(self, message, is_error=None):

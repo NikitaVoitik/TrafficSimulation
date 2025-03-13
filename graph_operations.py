@@ -66,10 +66,45 @@ class GraphManager:
             if self.graph.number_of_nodes() > 0:
                 pos = nx.spring_layout(self.graph)
 
+                # Draw nodes
                 nx.draw_networkx_nodes(self.graph, pos, node_color='#3498db', node_size=700,
                                        edgecolors='#2980b9')
 
+                # Draw regular edges
                 nx.draw_networkx_edges(self.graph, pos, edge_color='#95a5a6', width=2.5, arrows=True)
+
+                # Draw OD pairs as curved arrows
+                for origin, destination, demand in self.od_pairs:
+                    if origin in pos and destination in pos:
+                        # Create curved arrow for OD pair
+                        rad = 0.3  # curvature of the arc
+                        edge_color = '#e74c3c'  # red color for OD pairs
+
+                        # Draw a curved edge
+                        nx.draw_networkx_edges(
+                            nx.DiGraph([((origin, destination))]),
+                            pos,
+                            edge_color=edge_color,
+                            width=2.0,
+                            arrows=True,
+                            arrowstyle='-|>',
+                            arrowsize=15,
+                            connectionstyle=f'arc3,rad={rad}',
+                            alpha=0.8
+                        )
+
+                        # Add demand label on the curved edge
+                        edge_x = (pos[origin][0] + pos[destination][0]) / 2
+                        edge_y = (pos[origin][1] + pos[destination][1]) / 2
+                        # Offset to account for curvature
+                        offset_x = (pos[destination][1] - pos[origin][1]) * rad / 2
+                        offset_y = (pos[origin][0] - pos[destination][0]) * rad / 2
+
+                        plt.text(edge_x + offset_x, edge_y + offset_y,
+                                 f"D={demand}",
+                                 color=edge_color,
+                                 fontsize=10,
+                                 bbox=dict(boxstyle="round,pad=0.2", fc="white", ec=edge_color, alpha=0.8))
 
                 nx.draw_networkx_labels(self.graph, pos, font_color='white', font_size=14, font_weight='bold')
 
