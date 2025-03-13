@@ -19,7 +19,8 @@ def main():
     node_inputs = [window.node_input]
     edge_inputs = [window.node1_input, window.node2_input, window.weight_input]
     od_inputs = [window.origin_input, window.destination_input, window.demand_input]
-    all_inputs = node_inputs + edge_inputs + od_inputs
+    file_inputs = [window.filename_input]
+    all_inputs = node_inputs + edge_inputs + od_inputs + file_inputs
 
     running = True
     while running:
@@ -56,6 +57,12 @@ def main():
                             clear_input_boxes(od_inputs)
                     except ValueError:
                         window._set_status("Invalid demand value", is_error=True)
+                elif window.save_button.is_clicked(event.pos):
+                    window.save_current_graph(window.filename_input.text)
+
+                elif window.load_button.is_clicked(event.pos):
+                    if window.load_saved_graph(window.filename_input.text):
+                        clear_input_boxes([window.filename_input])
 
             for box in all_inputs:
                 box.update()

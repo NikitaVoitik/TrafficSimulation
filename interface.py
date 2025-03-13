@@ -115,6 +115,10 @@ class Window:
         self.clear_button = Button(400, 890, 170, 35, "Clear Graph")
         self.add_od_button = Button(800, 890, 170, 35, "Add OD Pair")
 
+        self.filename_input = InputBox(1020, 770, 150, 35, placeholder="Graph")
+        self.save_button = Button(1020, 810, 150, 35, "Save Graph")
+        self.load_button = Button(1020, 850, 150, 35, "Load Graph")
+
     def draw_graph(self):
         self.graph_image = self.graph_manager.create_graph_image(self.graph_area.width, self.graph_area.height)
         self.screen.blit(self.graph_image, (self.graph_area.x, self.graph_area.y))
@@ -198,6 +202,23 @@ class Window:
         self._draw_text(f"OD Pairs: {len(self.graph_manager.od_pairs)}", 600, 950)
         self._draw_text(self.status_message, 50, 950, self.status_color)
 
+        self._draw_text("SAVE & LOAD", 600, 745, self.accent_color)
+        self.filename_input.draw(self.screen)
+        self.save_button.draw(self.screen)
+        self.load_button.draw(self.screen)
+
     def _draw_text(self, text, x, y, color=None):
         text_surface = self.font.render(text, True, color or self.text_color)
         self.screen.blit(text_surface, (x, y))
+
+    def save_current_graph(self, filename):
+        success, message = self.graph_manager.save_graph(filename)
+        self._set_status(message, not success)
+        return success
+
+    def load_saved_graph(self, filename):
+        success, message = self.graph_manager.load_graph(filename)
+        if success:
+            self.draw_graph()  # Redraw the graph after loading
+        self._set_status(message, not success)
+        return success

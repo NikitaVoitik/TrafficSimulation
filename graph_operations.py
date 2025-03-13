@@ -1,5 +1,6 @@
 import io
-from collections import defaultdict
+import json
+import os
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -10,8 +11,8 @@ class GraphManager:
     def __init__(self):
         self.graph = nx.Graph()
         self.od_pairs = []
-        self.link_flows = defaultdict(float)
         self.buf = io.BytesIO()
+        self.save_directory = "saved_graphs"
 
     def add_node(self, node):
         if not node:
@@ -47,7 +48,6 @@ class GraphManager:
     def clear_graph(self):
         self.graph.clear()
         self.od_pairs = []
-        self.link_flows.clear()
         return "Graph cleared"
 
     def find_shortest_path(self, origin, destination):
@@ -64,19 +64,19 @@ class GraphManager:
             ax.set_facecolor('#f8f9fa')
 
             if self.graph.number_of_nodes() > 0:
-                pos = nx.spring_layout(self.graph, seed=42)
+                pos = nx.spring_layout(self.graph)
 
-                nx.draw_networkx_nodes(self.graph, pos, node_color='#3498db', node_size=700, alpha=0.9,
+                nx.draw_networkx_nodes(self.graph, pos, node_color='#3498db', node_size=700,
                                        edgecolors='#2980b9')
 
-                nx.draw_networkx_edges(self.graph, pos, edge_color='#95a5a6', width=2.5, alpha=0.8, arrows=True)
+                nx.draw_networkx_edges(self.graph, pos, edge_color='#95a5a6', width=2.5, arrows=True)
 
                 nx.draw_networkx_labels(self.graph, pos, font_color='white', font_size=14, font_weight='bold')
 
                 edge_labels = {(u, v): f"{data['weight']}" for u, v, data in self.graph.edges(data=True)}
                 nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=edge_labels, font_size=12,
                                              font_color='#34495e',
-                                             bbox=dict(boxstyle="round,pad=0.3", ec="#cccccc", fc="white", alpha=0.8))
+                                             bbox=dict(boxstyle="round,pad=0.3", ec="#cccccc", fc="white"))
 
             ax.set_axis_off()
 
@@ -97,3 +97,60 @@ class GraphManager:
             print(f"Error creating graph image: {e}")
             plt.close('all')
             return None
+
+    def save_graph(self, filename):
+        if not filename:
+            return False, "Filename cannot be empty"
+
+        if not filename.endswith('.json'):
+            filename += '.json'
+
+        filepath = os.path.join(self.save_directory, filename)
+
+        graph_data = {
+            'nodes': list(self.graph.nodes()),
+            'edges': [(u, v, d) for u, v, d in self.graph.edges(data=True)],
+            'od_pairs': self.od_pairs
+        }
+
+        try:
+            with open(filepath, 'w') as f:
+                json.dump(graph_data, f, indent=2)
+            return True, f"Graph saved to {filename}"
+        except Exception as e:
+            return False, f"Error saving graph: {str(e)}"
+
+    def load_graph(self, filename):
+        if not filename:
+            return False, "Filename cannot be empty"
+
+        if not filename.endswith('.json'):
+            filename += '.json'
+
+        filepath = os.path.join(self.save_directory, filename)
+
+        if not os.path.exists(filepath):
+            return False, f"File {filename} not found"
+
+        try:
+            with open(filepath, 'r') as f:
+                graph_data = json.load(f)
+
+            self.graph.clear()
+            self.od_pairs = []
+
+            self.graph.add_nodes_from(graph_data['nodes'])
+
+            for u, v, d in graph_data['edges']:
+                self.graph.add_edge(u, v, **d)
+
+            self.od_pairs = graph_data['od_pairs']
+
+            return True, f"Graph loaded from {filename}"
+        except Exception as e:
+            return False, f"Error loading graph: {str(e)}"
+
+    def get_saved_graphs(self):
+        if not os.path.exists(self.save_directory):
+            return []
+        return [f for f in os.listdir(self.save_directory) if f.endswith('.json')]
