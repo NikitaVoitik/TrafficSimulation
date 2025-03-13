@@ -24,11 +24,11 @@ class GraphManager:
         self.graph.add_node(node)
         return True, f"Node '{node}' added"
 
-    def add_edge(self, node1, node2, weight=1):
+    def add_edge(self, node1, node2, weight=1, capacity=100):
         if node1 not in self.graph.nodes or node2 not in self.graph.nodes:
             return False, "One or both nodes don't exist"
 
-        self.graph.add_edge(node1, node2, weight=weight)
+        self.graph.add_edge(node1, node2, weight=weight, capacity=capacity)
         return True, f"Edge between '{node1}' and '{node2}' added"
 
     def add_od_pair(self, origin, destination, demand):
@@ -108,7 +108,8 @@ class GraphManager:
 
                 nx.draw_networkx_labels(self.graph, pos, font_color='white', font_size=14, font_weight='bold')
 
-                edge_labels = {(u, v): f"{data['weight']}" for u, v, data in self.graph.edges(data=True)}
+                edge_labels = {(u, v): f"t={data['weight']}\nc={data.get('capacity', 'N/A')}"
+                               for u, v, data in self.graph.edges(data=True)}
                 nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=edge_labels, font_size=12,
                                              font_color='#34495e',
                                              bbox=dict(boxstyle="round,pad=0.3", ec="#cccccc", fc="white"))

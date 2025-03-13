@@ -17,7 +17,7 @@ def main():
     window.draw_graph()
 
     node_inputs = [window.node_input]
-    edge_inputs = [window.node1_input, window.node2_input, window.weight_input]
+    edge_inputs = [window.node1_input, window.node2_input, window.weight_input, window.capacity_input]
     od_inputs = [window.origin_input, window.destination_input, window.demand_input]
     file_inputs = [window.filename_input]
     all_inputs = node_inputs + edge_inputs + od_inputs + file_inputs
@@ -63,6 +63,14 @@ def main():
                 elif window.load_button.is_clicked(event.pos):
                     if window.load_saved_graph(window.filename_input.text):
                         clear_input_boxes([window.filename_input])
+                elif window.add_edge_button.is_clicked(event.pos):
+                    try:
+                        weight = float(window.weight_input.text) if window.weight_input.text else 1
+                        capacity = float(window.capacity_input.text) if window.capacity_input.text else 100
+                        if window.add_edge(window.node1_input.text, window.node2_input.text, weight, capacity):
+                            clear_input_boxes(edge_inputs)
+                    except ValueError:
+                        window._set_status("Invalid weight or capacity value", is_error=True)
 
             for box in all_inputs:
                 box.update()

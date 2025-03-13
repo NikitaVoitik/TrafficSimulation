@@ -105,6 +105,7 @@ class Window:
         self.node1_input = InputBox(150, 810, 200, 35, placeholder="From node")
         self.node2_input = InputBox(150, 850, 200, 35, placeholder="To node")
         self.weight_input = InputBox(150, 890, 200, 35, placeholder="Time value")
+        self.capacity_input = InputBox(150, 930, 200, 35, placeholder="Capacity value")
 
         self.origin_input = InputBox(800, 770, 200, 35, placeholder="Origin node")
         self.destination_input = InputBox(800, 810, 200, 35, placeholder="Destination node")
@@ -131,8 +132,8 @@ class Window:
             self.draw_graph()
         return success
 
-    def add_edge(self, node1, node2, weight=1):
-        success, message = self.graph_manager.add_edge(node1, node2, weight)
+    def add_edge(self, node1, node2, weight=1, capacity=100):
+        success, message = self.graph_manager.add_edge(node1, node2, weight, capacity)
         self._set_status(message, not success)
         if success:
             self.draw_graph()
@@ -185,6 +186,9 @@ class Window:
 
         self._draw_text("Travel Time:", 50, 895)
         self.weight_input.draw(self.screen)
+
+        self._draw_text("Capacity:", 50, 935)
+        self.capacity_input.draw(self.screen)
 
         self.add_node_button.draw(self.screen)
         self.add_edge_button.draw(self.screen)
