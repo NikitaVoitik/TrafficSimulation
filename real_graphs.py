@@ -75,25 +75,21 @@ def draw_msa_result(graph: nx.Graph):
     plt.figure(figsize=(10, 8), dpi=100)
     plt.title("MSA Traffic Assignment Results", fontsize=14)
 
-    pos = nx.spring_layout(graph, seed=42)  # Fixed seed for consistent layout
+    pos = nx.spring_layout(graph, seed=52)
 
-    # Draw nodes with better visibility
     nx.draw_networkx_nodes(graph, pos,
                           node_color="#66b3ff",
                           edgecolors="#1f78b4",
                           node_size=700)
 
-    # Draw edges with width proportional to volume
     edge_widths = [data.get("volume", 0)/5 + 1 for _, _, data in graph.edges(data=True)]
     nx.draw_networkx_edges(graph, pos,
                           width=edge_widths,
                           edge_color="#808080",
                           alpha=0.7)
 
-    # Draw labels
     nx.draw_networkx_labels(graph, pos, font_size=12, font_color="white", font_weight="bold")
 
-    # Create detailed edge labels
     edge_labels = {}
     for u, v, data in graph.edges(data=True):
         vol = data.get("volume", 0)
@@ -108,7 +104,7 @@ def draw_msa_result(graph: nx.Graph):
     plt.axis("off")
     plt.tight_layout()
     plt.get_current_fig_manager().set_window_title("MSA Traffic Assignment")
-    plt.show(block=False)  # Non-blocking to allow Pygame to continue
+    plt.show(block=False)
 
 
 def create_test_graph():
