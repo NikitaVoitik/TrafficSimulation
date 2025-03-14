@@ -2,6 +2,7 @@ import io
 
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 import pygame
 
 
@@ -56,6 +57,7 @@ class ResultOverlay:
         edge_costs = []
         total_cost = 0
         total_volume = 0
+        total_time = 0
 
         for u, v, data in graph.edges(data=True):
             volume = data.get("volume", 0)
@@ -65,6 +67,7 @@ class ResultOverlay:
             edge_costs.append((u, v, travel_time, volume, edge_cost))
             total_cost += edge_cost
             total_volume += volume
+            total_time += travel_time
 
         # Find min and max cost edges
         if edge_costs:
@@ -90,6 +93,7 @@ class ResultOverlay:
             f"Max cost path: {max_cost_edge[4]:.2f} (Edge {max_cost_edge[0]}-{max_cost_edge[1]})",
             f"Total network cost: {total_cost:.2f}",
             f"Average travel cost: {avg_cost:.2f}",
+            f"Total travel time: {round(total_time, 2)}"
         ]
 
         y_offset = start_y + 30
@@ -111,17 +115,41 @@ class ResultOverlay:
 
         pos = nx.spring_layout(graph, seed=42)
 
+        # Draw nodes
         nx.draw_networkx_nodes(graph, pos,
                                node_color="#66b3ff",
                                edgecolors="#1f78b4",
                                node_size=700)
 
-        edge_widths = [data.get("volume", 0) / 5 + 1 for _, _, data in graph.edges(data=True)]
+        # Get all volumes for better scaling
+        volumes = [data.get("volume", 0) for _, _, data in graph.edges(data=True)]
+        max_volume = max(volumes) if volumes else 1
+        min_volume = min(volumes) if volumes else 0
+
+        # Better edge width scaling - use logarithmic scale for high variance
+        if max_volume - min_volume > 100:
+            # Log scale for high variance in volumes
+            edge_widths = [1 + 5 * (np.log1p(data.get("volume", 0)) / np.log1p(max_volume))
+                          for _, _, data in graph.edges(data=True)]
+        else:
+            # Linear scale with constraints for low variance
+            edge_widths = []
+            for _, _, data in graph.edges(data=True):
+                vol = data.get("volume", 0)
+                # Scale to range 1-8 pixels
+                if max_volume == min_volume:
+                    width = 2  # Default width if all volumes are equal
+                else:
+                    width = 1 + 7 * ((vol - min_volume) / (max_volume - min_volume))
+                edge_widths.append(width)
+
+        # Draw edges with improved width scaling
         nx.draw_networkx_edges(graph, pos,
                                width=edge_widths,
                                edge_color="#808080",
                                alpha=0.7)
 
+        # Rest of the method remains the same...
         nx.draw_networkx_labels(graph, pos, font_size=12, font_color="white", font_weight="bold")
 
         edge_labels = {}

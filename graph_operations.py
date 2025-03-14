@@ -64,23 +64,17 @@ class GraphManager:
             ax.set_facecolor('#f8f9fa')
 
             if self.graph.number_of_nodes() > 0:
-                pos = nx.spring_layout(self.graph)
-
-                # Draw nodes
+                pos = nx.spring_layout(self.graph, seed=42)
                 nx.draw_networkx_nodes(self.graph, pos, node_color='#3498db', node_size=700,
                                        edgecolors='#2980b9')
 
-                # Draw regular edges
                 nx.draw_networkx_edges(self.graph, pos, edge_color='#95a5a6', width=2.5, arrows=True)
 
-                # Draw OD pairs as curved arrows
                 for origin, destination, demand in self.od_pairs:
                     if origin in pos and destination in pos:
-                        # Create curved arrow for OD pair
-                        rad = 0.3  # curvature of the arc
-                        edge_color = '#e74c3c'  # red color for OD pairs
+                        rad = 0.3
+                        edge_color = '#e74c3c'
 
-                        # Draw a curved edge
                         nx.draw_networkx_edges(
                             nx.DiGraph([((origin, destination))]),
                             pos,
@@ -93,10 +87,8 @@ class GraphManager:
                             alpha=0.8
                         )
 
-                        # Add demand label on the curved edge
                         edge_x = (pos[origin][0] + pos[destination][0]) / 2
                         edge_y = (pos[origin][1] + pos[destination][1]) / 2
-                        # Offset to account for curvature
                         offset_x = (pos[destination][1] - pos[origin][1]) * rad / 2
                         offset_y = (pos[origin][0] - pos[destination][0]) * rad / 2
 

@@ -20,7 +20,7 @@ def calculate_paths_dijkstra(graph, od_pairs):
     return paths
 
 
-def msa(graph, od_pairs, max_iter=100, convergence_threshold=0.001):
+def msa(graph, od_pairs, max_iter=10000, convergence_threshold=0.001):
     g = graph.copy()
 
     for u, v, data in g.edges(data=True):
