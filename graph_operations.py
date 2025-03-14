@@ -9,7 +9,7 @@ import pygame
 
 class GraphManager:
     def __init__(self):
-        self.graph = nx.Graph()
+        self.graph = nx.DiGraph()
         self.od_pairs = []
         self.buf = io.BytesIO()
         self.save_directory = "saved_graphs"

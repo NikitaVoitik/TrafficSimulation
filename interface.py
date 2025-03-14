@@ -120,6 +120,8 @@ class Window:
         self.save_button = Button(1020, 810, 150, 35, "Save Graph")
         self.load_button = Button(1020, 850, 150, 35, "Load Graph")
 
+        self.calculate_button = Button(600, 890, 170, 35, "Calculate")
+
     def draw_graph(self):
         self.graph_image = self.graph_manager.create_graph_image(self.graph_area.width, self.graph_area.height)
         self.screen.blit(self.graph_image, (self.graph_area.x, self.graph_area.y))
@@ -202,6 +204,8 @@ class Window:
 
         self._draw_text("Demand:", 700, 855)
         self.demand_input.draw(self.screen)
+
+        self.calculate_button.draw(self.screen)
 
         self.add_od_button.draw(self.screen)
 
