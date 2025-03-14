@@ -229,6 +229,6 @@ class Window:
     def load_saved_graph(self, filename):
         success, message = self.graph_manager.load_graph(filename)
         if success:
-            self.draw_graph()  # Redraw the graph after loading
+            self.draw_graph()
         self._set_status(message, not success)
         return success

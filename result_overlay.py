@@ -23,13 +23,13 @@ class ResultOverlay:
         result_surface = self.create_result_surface(graph)
 
         img_w, img_h = result_surface.get_size()
-        scale = min(self.width / img_w * 0.9, self.height / img_h * 0.75)  # Reduced to make room for stats
+        scale = min(self.width / img_w * 0.9, self.height / img_h * 0.75)
         new_w, new_h = int(img_w * scale), int(img_h * scale)
 
         scaled_surface = pygame.transform.smoothscale(result_surface, (new_w, new_h))
 
         pos_x = (self.width - new_w) // 2
-        pos_y = (self.height - new_h) // 2 - 50  # Moved up to make room for stats
+        pos_y = (self.height - new_h) // 2 - 50
         self.surface.blit(scaled_surface, (pos_x, pos_y))
 
         stats_y = pos_y + new_h + 10
@@ -49,11 +49,9 @@ class ResultOverlay:
         self.visible = True
 
     def draw_statistics(self, graph, start_y):
-        """Draw network statistics to the surface"""
         title_font = pygame.font.SysFont('Arial', 20, bold=True)
         stats_font = pygame.font.SysFont('Arial', 16)
 
-        # Extract relevant statistics
         edge_costs = []
         total_cost = 0
         total_volume = 0
@@ -69,23 +67,20 @@ class ResultOverlay:
             total_volume += volume
             total_time += travel_time
 
-        # Find min and max cost edges
         if edge_costs:
-            min_edge = min(edge_costs, key=lambda x: x[2])  # Min travel time
-            max_edge = max(edge_costs, key=lambda x: x[2])  # Max travel time
-            min_cost_edge = min(edge_costs, key=lambda x: x[4])  # Min cost (volume*time)
-            max_cost_edge = max(edge_costs, key=lambda x: x[4])  # Max cost (volume*time)
+            min_edge = min(edge_costs, key=lambda x: x[2])
+            max_edge = max(edge_costs, key=lambda x: x[2])
+            min_cost_edge = min(edge_costs, key=lambda x: x[4])
+            max_cost_edge = max(edge_costs, key=lambda x: x[4])
             avg_cost = total_cost / total_volume if total_volume > 0 else 0
         else:
             min_edge = max_edge = min_cost_edge = max_cost_edge = (None, None, 0, 0, 0)
             avg_cost = 0
 
-        # Draw title
         title = title_font.render("Network Statistics", True, pygame.Color(30, 30, 30))
         title_x = (self.width - title.get_width()) // 2
         self.surface.blit(title, (title_x, start_y))
 
-        # Draw statistics
         stats_texts = [
             f"Min travel time: {min_edge[2]:.2f} (Edge {min_edge[0]}-{min_edge[1]})",
             f"Max travel time: {max_edge[2]:.2f} (Edge {max_edge[0]}-{max_edge[1]})",
@@ -115,41 +110,33 @@ class ResultOverlay:
 
         pos = nx.spring_layout(graph, seed=42)
 
-        # Draw nodes
         nx.draw_networkx_nodes(graph, pos,
                                node_color="#66b3ff",
                                edgecolors="#1f78b4",
                                node_size=700)
 
-        # Get all volumes for better scaling
         volumes = [data.get("volume", 0) for _, _, data in graph.edges(data=True)]
         max_volume = max(volumes) if volumes else 1
         min_volume = min(volumes) if volumes else 0
 
-        # Better edge width scaling - use logarithmic scale for high variance
         if max_volume - min_volume > 100:
-            # Log scale for high variance in volumes
             edge_widths = [1 + 5 * (np.log1p(data.get("volume", 0)) / np.log1p(max_volume))
-                          for _, _, data in graph.edges(data=True)]
+                           for _, _, data in graph.edges(data=True)]
         else:
-            # Linear scale with constraints for low variance
             edge_widths = []
             for _, _, data in graph.edges(data=True):
                 vol = data.get("volume", 0)
-                # Scale to range 1-8 pixels
                 if max_volume == min_volume:
-                    width = 2  # Default width if all volumes are equal
+                    width = 2
                 else:
                     width = 1 + 7 * ((vol - min_volume) / (max_volume - min_volume))
                 edge_widths.append(width)
 
-        # Draw edges with improved width scaling
         nx.draw_networkx_edges(graph, pos,
                                width=edge_widths,
                                edge_color="#808080",
                                alpha=0.7)
 
-        # Rest of the method remains the same...
         nx.draw_networkx_labels(graph, pos, font_size=12, font_color="white", font_weight="bold")
 
         edge_labels = {}
