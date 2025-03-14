@@ -37,7 +37,6 @@ def main():
 
     running = True
     while running:
-        # Draw UI based on whether results are visible
         if not result_overlay.visible:
             window.draw_ui()
         else:
@@ -50,12 +49,10 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            # Handle result overlay events first
             if result_overlay.visible:
                 if result_overlay.handle_event(event):
                     continue
 
-            # Only handle UI events when overlay is not visible
             if not result_overlay.visible:
                 for box in all_inputs:
                     box.handle_event(event)
